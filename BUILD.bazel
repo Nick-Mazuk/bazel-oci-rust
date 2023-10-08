@@ -1,0 +1,32 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_oci//oci:defs.bzl", "oci_image")
+
+package(default_visibility = ["//visibility:public"])
+
+# Step 1: Build to binary
+rust_binary(
+    name = "hello_bin",
+    srcs = [
+        "main.rs",
+    ],
+)
+
+# Step 2: Compress it to layer using pkg_tar
+pkg_tar(
+    name = "hello_bin_layer",
+    srcs = [":hello_bin"],
+)
+
+# Step 3: Build image and add built layer to it
+oci_image(
+    name = "hello_image",
+    architecture = select({
+        "@platforms//cpu:arm64": "arm64",
+        "@platforms//cpu:x86_64": "amd64",
+    }),
+    base = "@distroless_cc",
+    entrypoint = ["/hello_bin"],
+    os = "linux",
+    tars = [":hello_bin_layer"],
+)
