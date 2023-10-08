@@ -1,6 +1,6 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("@rules_oci//oci:defs.bzl", "oci_image")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -29,4 +29,10 @@ oci_image(
     entrypoint = ["/hello_bin"],
     os = "linux",
     tars = [":hello_bin_layer"],
+)
+
+oci_tarball(
+    name = "hello_tarball",
+    image = ":hello_image",
+    repo_tags = ["hello:latest"],
 )
